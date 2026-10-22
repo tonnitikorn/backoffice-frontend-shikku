@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+/* Minimal theme — brand primary #93C6BF (primary-400). Text on primary uses
+   primary-900 for contrast; primary-600/700 are used for text/links on white. */
+@theme {
+  --color-primary-50: #f2f8f7;
+  --color-primary-100: #e3f0ee;
+  --color-primary-200: #c8e2de;
+  --color-primary-300: #aed4ce;
+  --color-primary-400: #93c6bf;
+  --color-primary-500: #74b0a8;
+  --color-primary-600: #579289;
+  --color-primary-700: #43736c;
+  --color-primary-800: #345952;
+  --color-primary-900: #25403b;
+
+  --font-sans: "IBM Plex Sans Thai", "Sarabun", "Segoe UI", system-ui, sans-serif;
+}
+
+:root {
+  --background: #fafafa;
+  --foreground: #27272a;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+@layer components {
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50 bg-primary-400 text-primary-900 hover:bg-primary-500 hover:text-white;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50 border border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50 text-zinc-600 hover:bg-zinc-100;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50 bg-red-500 text-white hover:bg-red-600;
+  }
+  .btn-sm {
+    @apply px-2.5 py-1 text-xs;
+  }
+  .link {
+    @apply cursor-pointer text-xs font-medium text-primary-700 hover:text-primary-900 disabled:opacity-50;
+  }
+  .link-danger {
+    @apply cursor-pointer text-xs font-medium text-red-500 hover:text-red-700 disabled:opacity-50;
+  }
+
+  /* Form controls */
+  .input {
+    @apply w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 transition-colors focus:border-primary-400 focus:ring-2 focus:ring-primary-100 focus:outline-none disabled:bg-zinc-50 disabled:text-zinc-400;
+  }
+  .input-sm {
+    @apply px-2 py-1;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-medium text-zinc-500;
+  }
+
+  /* Surfaces */
+  .card {
+    @apply rounded-xl border border-zinc-200/80 bg-white;
+  }
+  .table-wrap {
+    @apply overflow-x-auto rounded-xl border border-zinc-200/80 bg-white;
+  }
+  .data-table {
+    @apply w-full text-sm;
+  }
+  .data-table thead tr {
+    @apply border-b border-zinc-100 text-left;
+  }
+  .data-table th {
+    @apply px-4 py-3 text-xs font-medium tracking-wide text-zinc-400;
+  }
+  .data-table td {
+    @apply px-4 py-3 text-zinc-700;
+  }
+  .data-table tbody tr {
+    @apply border-b border-zinc-100 last:border-0 hover:bg-zinc-50/60;
+  }
+
+  /* Tabs (segmented control) */
+  /* Phones: one swipeable row instead of wrapping onto several lines. */
+  .tabs {
+    @apply inline-flex max-w-full flex-nowrap gap-1 overflow-x-auto rounded-lg bg-zinc-100 p-1 text-sm [scrollbar-width:none] sm:flex-wrap;
+  }
+  .tab {
+    @apply shrink-0 rounded-md px-3 py-1.5 whitespace-nowrap text-zinc-500 transition-colors hover:text-zinc-800;
+  }
+  .tab-active {
+    @apply bg-white text-zinc-900 shadow-sm;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+  .badge-primary {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-primary-100 text-primary-800;
+  }
+  .badge-muted {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-zinc-100 text-zinc-500;
+  }
+  .badge-warn {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-amber-50 text-amber-700;
+  }
+  .badge-danger {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-50 text-red-600;
+  }
+
+  .error-text {
+    @apply text-sm text-red-500;
+  }
+}
+
+/* Touch screens (iPad): no double-tap zoom delay on controls, and 16px inputs so iOS Safari doesn't zoom in on focus. */
+button,
+a,
+label,
+select,
+input {
+  touch-action: manipulation;
+}
+@media (pointer: coarse) {
+  .input {
+    font-size: 16px;
+  }
+}
+
+/* Touch screens: comfortable tap targets (Apple suggests ~44px). */
+@media (pointer: coarse) {
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-danger {
+    min-height: 2.75rem;
+  }
+  .btn-sm {
+    min-height: 2.25rem;
+  }
+  .tab {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .link,
+  .link-danger {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Phones: tighter table cells, no wrapping, and the first column stays put while swiping sideways. */
+@media (max-width: 639px) {
+  .data-table th,
+  .data-table td {
+    padding: 0.625rem 0.75rem;
+    white-space: nowrap;
+  }
+  .data-table th:first-child,
+  .data-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: #fff;
+    box-shadow: 1px 0 0 #f4f4f5;
+  }
+  .table-wrap {
+    -webkit-overflow-scrolling: touch;
+  }
+}
