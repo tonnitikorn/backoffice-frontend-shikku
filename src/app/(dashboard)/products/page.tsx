@@ -6,7 +6,7 @@ import { apiFetch } from "@/lib/apiClient";
 import { useAuthStore } from "@/lib/authStore";
 import { bahtToSatang, formatMoney } from "@/lib/format";
 import { ActiveBadge, ConfirmDialog, EmptyRow, Field, Modal, PageHeader, Tabs, TextField, errorMessage } from "@/components/ui";
-import type { Brand, Category, Product, ProductSku } from "@/lib/types";
+import type { Branch, Brand, Category, Product, ProductSku } from "@/lib/types";
 import { AddColorsModal, BulkProductModal, PowersInput } from "./bulk-product-form";
 import { ImportProductsModal } from "./import-products";
 import { ProductImages } from "./product-images";
@@ -165,8 +165,13 @@ function ProductDetail({ productId, onChanged, onDeleted }: { productId: string;
 
   const detail = useQuery({
     queryKey: ["product", productId],
-    queryFn: () => apiFetch<{ item: Product; variants: Variant[]; skus: ProductSku[] }>(`/products/${productId}`),
+    queryFn: () =>
+      apiFetch<{ item: Product; variants: Variant[]; skus: ProductSku[]; stock: { skuId: string; branchId: string; qtyOnHand: number }[] }>(
+        `/products/${productId}`,
+      ),
   });
+  const branchesQuery = useQuery({ queryKey: ["branches"], queryFn: () => apiFetch<{ items: Branch[] }>("/branches") });
+  const branches = branchesQuery.data?.items.filter((b) => b.active) ?? [];
 
   const refresh = () => {
     qc.invalidateQueries({ queryKey: ["product", productId] });
@@ -183,7 +188,8 @@ function ProductDetail({ productId, onChanged, onDeleted }: { productId: string;
   });
 
   if (detail.isLoading || !detail.data) return <div className="card p-6 text-sm text-zinc-400">กำลังโหลด...</div>;
-  const { item, variants, skus: allSkus } = detail.data;
+  const { item, variants, skus: allSkus, stock } = detail.data;
+  const qtyAt = (skuId: string, branchId: string) => stock.find((s) => s.skuId === skuId && s.branchId === branchId)?.qtyOnHand ?? 0;
   const variantName = (id?: string) => variants.find((v) => v._id === id)?.colorName;
   const variantOrder = (id?: string) => variants.findIndex((v) => v._id === id);
   const skus = allSkus
@@ -288,9 +294,13 @@ function ProductDetail({ productId, onChanged, onDeleted }: { productId: string;
         <table className="data-table">
           <thead>
             <tr>
-              <th>SKU</th>
-              <th>สี</th>
               <th>ค่าสายตา</th>
+              <th>สี</th>
+              {branches.map((b) => (
+                <th key={b._id} className="text-right">
+                  คงเหลือ {b.name.replace(/^สาขา/, "")}
+                </th>
+              ))}
               <th className="text-right">ราคา</th>
               <th className="text-right">ต้นทุน</th>
               <th>สถานะ</th>
@@ -298,12 +308,19 @@ function ProductDetail({ productId, onChanged, onDeleted }: { productId: string;
             </tr>
           </thead>
           <tbody>
-            {skus.length === 0 && <EmptyRow colSpan={7} text="ยังไม่มี SKU" />}
+            {skus.length === 0 && <EmptyRow colSpan={6 + branches.length} text="ยังไม่มี SKU" />}
             {skus.map((sku) => (
               <tr key={sku._id}>
-                <td className="font-mono text-xs text-zinc-700">{sku.skuCode}</td>
+                <td className="font-medium tabular-nums text-zinc-800">{sku.power === undefined ? "-" : sku.power.toFixed(2)}</td>
                 <td className="text-zinc-500">{variantName(sku.variantId) ?? "-"}</td>
-                <td className="tabular-nums">{sku.power === undefined ? "-" : sku.power.toFixed(2)}</td>
+                {branches.map((b) => {
+                  const qty = qtyAt(sku._id, b._id);
+                  return (
+                    <td key={b._id} className={`text-right tabular-nums ${qty <= 0 ? "text-zinc-300" : qty <= sku.minStockLevel ? "font-medium text-amber-600" : "text-zinc-800"}`}>
+                      {qty}
+                    </td>
+                  );
+                })}
                 <td className="text-right tabular-nums">฿{formatMoney(sku.priceRegular)}</td>
                 <td className="text-right tabular-nums">{sku.cost !== undefined ? `฿${formatMoney(sku.cost)}` : "-"}</td>
                 <td>
